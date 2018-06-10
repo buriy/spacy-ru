@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "spacy-ru"
+version = "0.1.0"
+description = ""
+authors = ["Yuri Baburov <burchik@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "*"
+spacy = "^2.0"
+pymorphy2 = "^0.8"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+#spacy = { git = "https://github.com/buriy/spaCy.git", branch = "master" }
