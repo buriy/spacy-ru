@@ -1,8 +1,7 @@
 To install:
 
-sudo pip install poetry
-
 ```
+sudo pip install poetry
 git clone https://github.com/buriy/spacy-ru.git
 cd spacy-ru
 poetry install
