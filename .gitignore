@@ -2,3 +2,5 @@
 .pydevproject
 .settings
 .venv
+__pycache__
+pyproject.lock
