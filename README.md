@@ -1,4 +1,4 @@
-To install:
+### To install:
 
 ```
 sudo pip install poetry
@@ -7,6 +7,17 @@ cd spacy-ru
 virtualenv --python=python3.6 .venv
 poetry install
 ```
+### To install for Windows:
+
+```
+git clone https://github.com/buriy/spacy-ru.git
+cd spacy-ru
+virtualenv --python=python3.6 .venv
+python setup.py install 
+```
+
+### Run example:
+
 To activate a virtualenv in a shell:
 ```
 . .venv/bin/activate

@@ -4,3 +4,12 @@
 .venv
 __pycache__
 pyproject.lock
+
+# idea
+.idea
+*.iml
+
+#build
+build/
+*.egg-info/
+dist/
