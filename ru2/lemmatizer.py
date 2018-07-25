@@ -106,7 +106,7 @@ class Russian2Lemmatizer(Lemmatizer):
             return string
         if len(analyses) == 1:
             return analyses[0].normal_form
-        print("Multiple alternatives for:", string)
+        #print("Multiple alternatives for:", string) ##TODO need logging
         return string
 
 def oc2ud(oc_tag):
