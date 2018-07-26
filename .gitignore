@@ -4,6 +4,7 @@
 .venv
 __pycache__
 pyproject.lock
+.ipynb_checkpoints
 
 # idea
 .idea
