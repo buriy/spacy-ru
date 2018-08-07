@@ -8,7 +8,12 @@ authors = ["Yuri Baburov <burchik@gmail.com>"]
 python = "*"
 spacy = "^2.0"
 pymorphy2 = "^0.8"
+notebook = "^5.6"
+pandas = "^0.23.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
+ipython = "^6.5"
 #spacy = { git = "https://github.com/buriy/spaCy.git", branch = "master" }
+#cupy = "^4.3"
+cupy-cuda91 = "^4.3"
