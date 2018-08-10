@@ -1,13 +1,23 @@
 # coding: utf8
-from spacy.symbols import ADJ, DET, NOUN, NUM, PRON, PROPN, PUNCT, VERB, POS  # @UnresolvedImport
+import os
 from spacy.lemmatizer import Lemmatizer
+from spacy.symbols import (
+    ADJ, DET, NOUN, NUM, PRON, PROPN, PUNCT, VERB, POS
+)
 
 
-class Russian2Lemmatizer(Lemmatizer):
+DEBUG = os.environ.get('DEBUG', False)
+
+from spacy import symbols as symb
+orth = {getattr(symb, name): name for name in dir(symb) if type(getattr(symb, name)) == type(0)}
+orth.update({v: v for k,v in orth.items()})
+orthd = lambda x: {orth[k]: orth[v] for k, v in x.items()} if x else x
+
+class RussianLemmatizer(Lemmatizer):
     _morph = None
 
-    def __init__(self, index=None, exc=None, rules=None, lookup=None):
-        super(Russian2Lemmatizer, self).__init__()
+    def __init__(self):
+        super(RussianLemmatizer, self).__init__()
         try:
             from pymorphy2 import MorphAnalyzer
         except ImportError:
@@ -15,13 +25,13 @@ class Russian2Lemmatizer(Lemmatizer):
                 'The Russian lemmatizer requires the pymorphy2 library: '
                 'try to fix it with "pip install pymorphy2==0.8"')
 
-        if Russian2Lemmatizer._morph is None:
-            Russian2Lemmatizer._morph = MorphAnalyzer()
+        if RussianLemmatizer._morph is None:
+            RussianLemmatizer._morph = MorphAnalyzer()
 
     def __call__(self, string, univ_pos, morphology=None):
-        print("Call:", string, univ_pos)
-
+        if DEBUG: print("Set lemma for selected POS tag: {} {} {}".format(string, orth[univ_pos], orthd(morphology)))
         univ_pos = self.normalize_univ_pos(univ_pos)
+
         if univ_pos == 'PUNCT':
             return [PUNCT_RULES.get(string, string)]
 
@@ -88,6 +98,7 @@ class Russian2Lemmatizer(Lemmatizer):
         return None
 
     def is_base_form(self, univ_pos, morphology=None):
+        if DEBUG: print("Method Lemmatizer.is_base_form is not implemented: {} {}".format(univ_pos, morphology))
         # TODO
         raise NotImplementedError
 
@@ -101,13 +112,18 @@ class Russian2Lemmatizer(Lemmatizer):
         return self(string, 'pron', morphology)
 
     def lookup(self, string):
+        if DEBUG: print("No tagger, so we do Lemmatizer.lookup: {}".format(string))
         analyses = self._morph.parse(string)
-        if not analyses:
-            return string
-        if len(analyses) == 1:
-            return analyses[0].normal_form
-        #print("Multiple alternatives for:", string) ##TODO need logging
+        analyses_all = [r.normal_form for r in self._morph.parse(string)]
+        analyses_known = [r.normal_form for r in analyses if r.is_known]
+        if len(list(set(analyses_known))) == 1:
+            return analyses_known[0]
+        elif len(list(set(analyses_all))) == 1:
+            return analyses_all[0]
+        elif DEBUG:
+            print("Found {} lookup alternatives for: {}".format(len(list(set(analyses_all))), string))
         return string
+
 
 def oc2ud(oc_tag):
     gram_map = {

@@ -1,7 +1,13 @@
-def print_tokens(doc):
+import pandas
+from tabulate import tabulate
+
+def pbool(x):
+    return '+' if x else '-'
+
+def print_tokens(nlp, doc):
     for s in doc.sents:
         print('Sentence: "{}"'.format(s))
-        for token in s:
-            print("{}\t{}\t{}\t{}\t{}\t{}".format(
-                token.shape_, token.pos_, token.is_punct, token.text, token.lemma_, token.tag_ 
-            ))
+        df = pandas.DataFrame(columns=['Shape', 'Vocab', 'POS', 'Text', 'Tag', 'Lemma', 'Dep', 'Head'], 
+                             data=[(t.shape_, pbool(t.orth_ in nlp.vocab), t.pos_, 
+                                    t.text, t.tag_, t.lemma_, t.dep_, t.head) for t in s])
+        print(tabulate(df, showindex=False, headers=df.columns))

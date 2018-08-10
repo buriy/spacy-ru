@@ -2,6 +2,7 @@
 .pydevproject
 .settings
 .venv
+*.pyc
 __pycache__
 pyproject.lock
 .ipynb_checkpoints
