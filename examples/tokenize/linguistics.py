@@ -37,7 +37,7 @@ class Linguistic(object):
         for doc in docs:
             doc = self.nlp(doc)
             if debug_print_tokens:
-                print_tokens(doc)
+                print_tokens(self.nlp, doc)
             tokens = [tok.lemma_.lower().strip() for tok in doc if tok.lemma_ != PRON]  # normalize words, clear pronouns form
             tokens = [tok for tok in tokens
                       if tok not in self.stopwords and tok not in self.punctuations]  # filtering tokens, clear all punctuations symbols and stop words
