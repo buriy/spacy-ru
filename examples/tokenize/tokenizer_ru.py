@@ -9,3 +9,5 @@ if __name__ == '__main__':
     print("Pipeline: {}".format(nlp.pipe_names))
     doc = nlp(sample_sentences)
     print_tokens(nlp, doc)
+    #for e in doc.ents:
+    #    print('"',e.text,'"', e.label_)
