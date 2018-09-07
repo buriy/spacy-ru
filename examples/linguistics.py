@@ -1,12 +1,6 @@
 import string
-
 from spacy.symbols import PRON
-
-try:
-    from .utils import print_tokens
-except:
-    from utils import print_tokens
-
+from .utils import print_tokens
 
 class Linguistic(object):
     def __init__(self, nlp, stopwords, punctuations=string.punctuation):

@@ -6,14 +6,14 @@ authors = ["Yuri Baburov <burchik@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "*"
-spacy = "^2.0"
 pymorphy2 = "^0.8"
 notebook = "^5.6"
 pandas = "^0.23.4"
+nltk = "^3.3"
+msgpack = "^0.5.6"
+spacy = "^2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 ipython = "^6.5"
-#spacy = { git = "https://github.com/buriy/spaCy.git", branch = "master" }
-#cupy = "^4.3"
-cupy-cuda91 = "^4.3"
+#cupy-cuda91 = ">=4.3"
