@@ -21,7 +21,7 @@
 После этого нужно загрузить модели с морфологией и синтаксисом 
 ```python
 import spacy
-sample_sentences = "Привет Миру! Как твои дела? Сегодня не плохая погода."
+sample_sentences = "Привет Миру! Как твои дела? Сегодня неплохая погода."
 if __name__ == '__main__':
     nlp = spacy.load('ru2')
     nlp.add_pipe(nlp.create_pipe('sentencizer'), first=True)
@@ -30,6 +30,15 @@ if __name__ == '__main__':
     	print(list(['lemma "{}" from text "{}"'.format(t.lemma_, t.text) for t in s]))
 ``` 
 Если нужна модель с pymorphy2 в качестве лемматизатора и POS: `nlp = spacy.load('ru2', disable=['tagger', 'parser', 'NER'])`
+
+### Пример в Docker контейнере
+вы можете попробовать пример использования ru2 модели:
+```bash
+git clone https://github.com/buriy/spacy-ru.git
+cd spacy-ru
+docker build -t spacy:ru2
+docker run --rm spacy:ru2
+```
 
 ### Предупреждения и возможные проблемы
  - Если нужен работающий thinc на GPU, то, возможно, нужно исправить (явно указать) путь к cuda и переустановить библиотеку:
