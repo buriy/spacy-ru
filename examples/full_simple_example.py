@@ -20,7 +20,7 @@ def print_tokens(nlp, doc):
                                     t.text, t.lemma_, entity_at(t), t.dep_, t.head) for t in s])
         print(tabulate(df, showindex=False, headers=df.columns))
 
-sample_sentences = "Привет Миру! Как твои дела? Сегодня не плохая погода."
+sample_sentences = "Привет Миру! Как твои дела? Сегодня неплохая погода."
 if __name__ == '__main__':
     nlp = spacy.load('ru2')
     nlp.add_pipe(nlp.create_pipe('sentencizer'), first=True)
