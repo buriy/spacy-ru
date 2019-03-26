@@ -47,3 +47,12 @@ pip uninstall -y thinc
 CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc\<6.11
 ```
 - Если вы переходите с xx на ru/ru2, то имейте в виду, что токенизация в ru/ru2 и xx отличается, т.к. xx не отделяет буквы от цифр и дефисы.
+- На Windows клонирование репозитория с настройкой `core.autocrlf true` в `git` 
+может испортить некоторые файлы и привести к ошибкам типа `msgpack._cmsgpack.unpackbTypeError: unhashable type: 'list'`.
+Для того чтобы этого избежать надо либо клонировать с `core.autocrlf false`, либо, например, 
+скачивать архив репозитория вручную через веб-интерфейс.
+Обсуждение проблемы и решение можно найти [здесь](https://github.com/explosion/spaCy/issues/1634).
+- Попытка вызова `spacy.displacy.serve()` или некоторых других функций на Python 3 может привести к 
+ошибке `TypeError: __init__() got an unexpected keyword argument 'encoding'`. Чтобы этого избежать,
+необходимо явно установить старую версию `msgpack-numpy<0.4.4.0`. Обсуждение проблемы и решение можно
+найти [здесь](https://github.com/explosion/spaCy/issues/2810).
