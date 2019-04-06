@@ -36,7 +36,7 @@ if __name__ == '__main__':
 ```bash
 git clone https://github.com/buriy/spacy-ru.git
 cd spacy-ru
-docker build -t spacy:ru2
+docker build -t spacy:ru2 .
 docker run --rm spacy:ru2
 ```
 
