@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 from ru2.examples import sentences
 
 ss = ['Ты кто такой?', 'Давай досвидания!']

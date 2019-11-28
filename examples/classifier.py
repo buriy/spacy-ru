@@ -10,12 +10,13 @@ see the documentation:
 Compatible with: spaCy v2.0.0+
 """
 from __future__ import unicode_literals, print_function
-import plac
+
 import random
 from pathlib import Path
-import thinc.extra.datasets
 
+import plac
 import spacy
+import thinc.extra.datasets
 from spacy.util import minibatch, compounding
 
 
