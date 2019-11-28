@@ -13,10 +13,10 @@
 - pip: `pip install pymorphy2==0.8`
 - conda: *к сожалению в репозиторях anaconda данный пакет доступен только для платформы osx-64* `conda install -c romanp pymorphy2==0.8`	
 
-2. установить spacy==2.0.12
-- pip: `pip install spacy==2.0.12`
-- conda: `conda install -c conda-forge spacy==2.0.12`
-3. Скопировать каталог ru2 из репозитория себе в проект: `git clone https://github.com/buriy/spacy-ru.git && cp -r ./spacy-ru/ru2/. /my_project_distination/ru2 `
+2. установить spacy 2.1:
+- pip: `pip install spacy==2.1.9`
+- conda: `conda install -c conda-forge spacy==2.1.9`
+3. Скопировать каталог ru2 из репозитория себе в проект: `git clone -b v2.1 https://github.com/buriy/spacy-ru.git && cp -r ./spacy-ru/ru2/. /my_project_destination/ru2 `
  
 После этого нужно загрузить модели с морфологией и синтаксисом 
 ```python
