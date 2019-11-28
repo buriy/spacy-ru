@@ -44,8 +44,9 @@ docker run --rm spacy:ru2
  - Если нужен работающий thinc на GPU, то, возможно, нужно исправить (явно указать) путь к cuda и переустановить библиотеку:
 ```bash
 pip uninstall -y thinc
-CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc\<6.11
+CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc==7.0.8
 ```
+Другой вариант -- попробовать что-то типа pip install spacy[cuda91] или pip install spacy[cuda10]
 - Если вы переходите с xx на ru/ru2, то имейте в виду, что токенизация в ru/ru2 и xx отличается, т.к. xx не отделяет буквы от цифр и дефисы.
 - На Windows клонирование репозитория с настройкой `core.autocrlf true` в `git` 
 может испортить некоторые файлы и привести к ошибкам типа `msgpack._cmsgpack.unpackbTypeError: unhashable type: 'list'`.
