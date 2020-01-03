@@ -8,10 +8,13 @@ pyproject.lock
 .ipynb_checkpoints
 
 # idea
-.idea
+/.vscode
+/.idea
 *.iml
 
 #build
 build/
 *.egg-info/
 dist/
+/data/
+poetry.lock
