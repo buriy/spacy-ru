@@ -16,14 +16,17 @@ setup:
 	test -d .venv || virtualenv --python=python3.6 .venv
 	poetry install
 
-gpu21:
-	.venv/bin/pip3 uninstall -y thinc
-	CUDA_HOME=/usr/local/cuda .venv/bin/pip3 install --upgrade --no-cache-dir cupy
-	CUDA_HOME=/usr/local/cuda .venv/bin/pip3 install --upgrade --no-cache-dir cupy-cuda100
-	CUDA_HOME=/usr/local/cuda .venv/bin/pip3 install --no-cache-dir thinc==7.0.8
-	poetry install
-	.venv/bin/python3 -c "import thinc.neural.gpu_ops"
+setup_cuda91: setup
+	./cuda.sh "<2.2" cuda91
+	.venv/bin/python3 -c "import spacy;spacy.require_gpu()"
 
+setup_cuda100: setup
+	./cuda.sh "<2.2" cuda100
+	.venv/bin/python3 -c "import spacy;spacy.require_gpu()"
+
+setup_cuda101: setup
+	./cuda.sh "<2.2" cuda101
+	.venv/bin/python3 -c "import spacy;spacy.require_gpu()"
 
 data/UD_Russian-SynTagRus/ru_syntagrus-ud-train.connlu:
 	mkdir -p data
