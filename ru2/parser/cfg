@@ -3,6 +3,9 @@
   "beam_density":0.0,
   "beam_update_prob":1.0,
   "cnn_maxout_pieces":3,
+  "deprecation_fixes":{
+    "vectors_name":"spacy_pretrained_vectors"
+  },
   "nr_class":104,
   "hidden_depth":1,
   "token_vector_width":96,

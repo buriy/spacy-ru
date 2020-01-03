@@ -1,10 +1,10 @@
 .PHONY: setup train n nb
 
 jupyter:
-	PYTHONPATH=`pwd` screen .venv/bin/jupyter notebook --port=8881 --no-browser .
+	PYTHONPATH=`pwd` screen .venv/bin/jupyter notebook --ip 0.0.0.0 --port=8881 --no-browser .
 
 browser:
-	PYTHONPATH=`pwd` screen .venv/bin/jupyter notebook --port=8881 .
+	PYTHONPATH=`pwd` screen .venv/bin/jupyter notebook --ip 0.0.0.0 --port=8881 .
 
 S:=.venv/bin/python -m spacy
 D:=data/UD_Russian-SynTagRus
