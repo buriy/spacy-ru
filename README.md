@@ -46,7 +46,26 @@ docker run --rm spacy:ru2
 pip uninstall -y thinc
 CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc==7.0.8
 ```
-Другой вариант -- попробовать что-то типа pip install spacy[cuda91] или pip install spacy[cuda10]
+Другой вариант -- попробовать что-то типа `pip install spacy[cuda91]` или `pip install spacy[cuda10]`
+Так же стоит проверить что `cupy` установленна верно для вашей версии cuda -[link](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy)
+пример установки для cuda 10.0
+```bash
+$ nvcc -V
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2018 NVIDIA Corporation
+Built on Sat_Aug_25_21:08:01_CDT_2018
+Cuda compilation tools, release 10.0, V10.0.130
+$ which nvcc
+/usr/local/cuda/bin/nvcc
+$ CUDA_HOME=/usr/local/cuda
+$ pip install cupy-cuda100
+...
+Successfully installed cupy-cuda100-7.1.0
+$ pip install --no-cache-dir spacy[cuda10]
+...
+Successfully installed spacy-2.2.3 blis-0.4.1 preshed-3.0.2 thinc-7.3.1
+```
+
 - Если вы переходите с xx на ru/ru2, то имейте в виду, что токенизация в ru/ru2 и xx отличается, т.к. xx не отделяет буквы от цифр и дефисы.
 - На Windows клонирование репозитория с настройкой `core.autocrlf true` в `git` 
 может испортить некоторые файлы и привести к ошибкам типа `msgpack._cmsgpack.unpackbTypeError: unhashable type: 'list'`.
