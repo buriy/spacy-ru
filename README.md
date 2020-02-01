@@ -47,7 +47,7 @@ pip uninstall -y thinc
 CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc==7.0.8
 ```
 Другой вариант -- попробовать что-то типа `pip install spacy[cuda91]` или `pip install spacy[cuda10]`
-Так же стоит проверить что `cupy` установленна верно для вашей версии cuda -[link](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy)
+Так же стоит проверить что `cupy` установлена верно для вашей версии cuda -[link](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy)
 пример установки для cuda 10.0
 ```bash
 $ nvcc -V
