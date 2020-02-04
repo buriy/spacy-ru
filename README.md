@@ -46,7 +46,7 @@ docker run --rm spacy:ru2
 pip uninstall -y thinc
 CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc==7.0.8
 ```
-Другой вариант -- попробовать что-то типа `pip install spacy[cuda91]` или `pip install spacy[cuda10]`
+Другой вариант -- попробовать что-то типа `pip install "spacy[cuda91]<2.2"` или `pip install "spacy[cuda10]<2.2"` для spacy версии 2.1.x.
 Так же стоит проверить что `cupy` установлена верно для вашей версии cuda -[link](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy)
 пример установки для cuda 10.0
 ```bash
@@ -61,9 +61,9 @@ $ CUDA_HOME=/usr/local/cuda
 $ pip install cupy-cuda100
 ...
 Successfully installed cupy-cuda100-7.1.0
-$ pip install --no-cache-dir spacy[cuda10]
+$ pip install --no-cache-dir "spacy[cuda10]<2.2"
 ...
-Successfully installed spacy-2.2.3 blis-0.4.1 preshed-3.0.2 thinc-7.3.1
+Successfully installed blis-0.2.4 preshed-2.0.1 spacy-2.1.9 thinc-7.0.8
 ```
 
 - Если вы переходите с xx на ru/ru2, то имейте в виду, что токенизация в ru/ru2 и xx отличается, т.к. xx не отделяет буквы от цифр и дефисы.
