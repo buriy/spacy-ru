@@ -2,6 +2,10 @@
 
 ## Преимущества модели ru2
 Оно старается определять не только x.pos_, но и x.lemma_ -- лемму слова (например, для существительных лемма совпадает с формой: "именительный падеж, единственное число") (edited) 
+## Модель ru2e
+Это "пустая" модель, которая использует стемминг (pip install pystemmer), полезна для пользовательских задач классификации, особенно, когда данных мало. Смотри пример в 
+https://github.com/buriy/spacy-ru/blob/master/notebooks/examples/textcat_news_topics.ipynb
+
 # Установка
 
 Инсталляция сейчас не супер-простая, кроме того, thinc не всегда из коробки работает.
@@ -41,13 +45,14 @@ docker run --rm spacy:ru2
 ```
 
 ### Предупреждения и возможные проблемы
- - Если нужен работающий thinc на GPU, то, возможно, нужно исправить (явно указать) путь к cuda и переустановить библиотеку:
+ - Если нужна работа на GPU (ускоряет обучение в 2-3 раза, инференс -- до 5 раз), то, возможно, нужно исправить (явно указать) путь к cuda и переустановить библиотеку thinc:
 ```bash
 pip uninstall -y thinc
 CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc==7.0.8
 ```
-Другой вариант -- попробовать что-то типа `pip install "spacy[cuda91]<2.2"` или `pip install "spacy[cuda10]<2.2"` для spacy версии 2.1.x.
-Так же стоит проверить что `cupy` установлена верно для вашей версии cuda -[link](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy)
+Другой вариант -- попробовать что-то типа `pip install "spacy[cuda91]<2.2"` или `pip install "spacy[cuda10]<2.2"` для spacy версии 2.1.x и вашей версии cuda.
+
+Если GPU по-прежнему не работает -- стоит явно проверить, что `cupy` установлена верно для вашей версии cuda: [link](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy)
 пример установки для cuda 10.0
 ```bash
 $ nvcc -V
@@ -66,13 +71,12 @@ $ pip install --no-cache-dir "spacy[cuda10]<2.2"
 Successfully installed blis-0.2.4 preshed-2.0.1 spacy-2.1.9 thinc-7.0.8
 ```
 
-- Если вы переходите с xx на ru/ru2, то имейте в виду, что токенизация в ru/ru2 и xx отличается, т.к. xx не отделяет буквы от цифр и дефисы.
+- Если вы переходите с многоязычной модели "xx" на модели ru/ru2, то имейте в виду, что токенизация в моделях ru/ru2 и xx отличается, т.к. xx не отделяет буквы от цифр и дефисы, то есть скажем слова "24-часовой" и "va-sya103" будут едиными неделимыми токенами.
 - На Windows клонирование репозитория с настройкой `core.autocrlf true` в `git` 
 может испортить некоторые файлы и привести к ошибкам типа `msgpack._cmsgpack.unpackbTypeError: unhashable type: 'list'`.
 Для того чтобы этого избежать надо либо клонировать с `core.autocrlf false`, либо, например, 
 скачивать архив репозитория вручную через веб-интерфейс.
 Обсуждение проблемы и решение можно найти [здесь](https://github.com/explosion/spaCy/issues/1634).
 - Попытка вызова `spacy.displacy.serve()` или некоторых других функций на Python 3 может привести к 
-ошибке `TypeError: __init__() got an unexpected keyword argument 'encoding'`. Чтобы этого избежать,
-необходимо явно установить старую версию `msgpack-numpy<0.4.4.0`. Обсуждение проблемы и решение можно
-найти [здесь](https://github.com/explosion/spaCy/issues/2810).
+ошибке `TypeError: __init__() got an unexpected keyword argument 'encoding'`. Чтобы этого избежать, раньше
+необходимо было явно установить старую версию `msgpack-numpy<0.4.4.0`. Сейчас вроде бы поправили. Обсуждение проблемы и решение можно найти [здесь](https://github.com/explosion/spaCy/issues/2810).
