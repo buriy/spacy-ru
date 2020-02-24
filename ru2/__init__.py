@@ -15,5 +15,10 @@ class Russian2(Russian):
     lang = 'ru'
     Defaults = Russian2Defaults
 
+def load_ru2(path, exclude=[]):
+    nlp = Russian2()
+    nlp.from_disk(path)
+    nlp.disable_pipes(*exclude)
+    return nlp
 
-__all__ = ['Russian2']
+__all__ = ['Russian2', 'load_ru2']
