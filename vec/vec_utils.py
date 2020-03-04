@@ -67,9 +67,9 @@ def my_tok_to_vec(width, embed_size, pretrained_vectors, **kwargs):
         # prefix = HashEmbed(
         #     width, embed_size // 2, column=cols.index(PREFIX), name="embed_prefix"
         # )
-        suffix = HashEmbed(
-            width, embed_size // 2, column=cols.index(SUFFIX), name="embed_suffix"
-        )
+        # suffix = HashEmbed(
+        #     width, embed_size // 2, column=cols.index(SUFFIX), name="embed_suffix"
+        # )
         shape = HashEmbed(
             width, embed_size // 2, column=cols.index(SHAPE), name="embed_shape"
         )
@@ -77,8 +77,8 @@ def my_tok_to_vec(width, embed_size, pretrained_vectors, **kwargs):
         vec_width = glove.nV
 
         embed = uniqued(
-            (glove | suffix | shape)
-            >> LN(Maxout(width, width * 2 + vec_width, pieces=3)),
+            (glove | shape)
+            >> LN(Maxout(width, width + vec_width, pieces=3)),
             column=cols.index(ORTH),
         )
 
