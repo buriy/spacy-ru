@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
    name='spacy-ru',
-   version='0.2.1',
+   version='2.2.4',
    packages=['ru2'],
    author='Yuri Baburov',
    author_email='burchik@gmail.com',

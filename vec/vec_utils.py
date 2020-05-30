@@ -73,12 +73,11 @@ def my_tok_to_vec(width, embed_size, pretrained_vectors, **kwargs):
         shape = HashEmbed(
             width, embed_size // 2, column=cols.index(SHAPE), name="embed_shape"
         )
-        glove = Vectors(storage, pretrained_vectors, width, column=cols.index(NORM), )
+        glove = Vectors(storage, pretrained_vectors, width, column=cols.index(NORM))
         vec_width = glove.nV
 
         embed = uniqued(
-            (glove | shape)
-            >> LN(Maxout(width, width + vec_width, pieces=3)),
+            (glove | shape) >> LN(Maxout(width, width + vec_width, pieces=3)),
             column=cols.index(ORTH),
         )
 
@@ -87,8 +86,10 @@ def my_tok_to_vec(width, embed_size, pretrained_vectors, **kwargs):
             >> LN(Maxout(width, width * 3, pieces=cnn_maxout_pieces))
         )
 
-        tok2vec = SaveDoc(storage) >> FeatureExtracter(cols) >> with_flatten(
-            embed >> convolution ** conv_depth, pad=conv_depth
+        tok2vec = (
+            SaveDoc(storage)
+            >> FeatureExtracter(cols)
+            >> with_flatten(embed >> convolution ** conv_depth, pad=conv_depth)
         )
 
         if bilstm_depth >= 1:

@@ -1,7 +1,8 @@
 import random
+from itertools import chain
+
 import spacy
 import spacy.gold
-from itertools import chain
 from tqdm.auto import tqdm
 
 
@@ -28,12 +29,13 @@ class Dataset:
     def __len__(self):
         return 0
 
-    def iter(self, nlp, limit=None):
+    def iter(self, nlp, limit=None, **opts):
         raise NotImplementedError()
 
     def __iter__(self):
-        nlp = spacy.blank(self.lang)
-        return self.iter(nlp)
+        raise NotImplementedError()
+        # nlp = spacy.blank(self.lang)
+        # return self.iter(nlp)
 
     def add_labels(self, gold):
         for tag in gold.tags:
@@ -61,7 +63,8 @@ class RawDataset(Dataset):
         super(RawDataset, self).__init__(lang=lang)
         self.ds = ds
         self.is_train = is_train
-        for doc, gold in self:
+        nlp = spacy.blank(lang)
+        for d, gold in self.iter(nlp):
             self.add_labels(gold)
 
     def set_train_test(self, ds_train, ds_test):
@@ -72,16 +75,16 @@ class RawDataset(Dataset):
             gold.ner = p.get("entities", [])
             self.add_labels(gold)
 
-    def iter(self, nlp, limit=None):
+    def iter(self, nlp, limit=None, **opts):
         ds_copy = self.ds[:]
         if self.is_train:
             random.shuffle(ds_copy)
         if limit:
             ds_copy = ds_copy[:limit]
-        for dict_ in self.ds:
-            doc = nlp(dict_["raw"])
+        for entry in self.ds:
+            doc = nlp(entry["raw"])
             gold = spacy.gold.GoldParse()
-            gold.ner = dict_.get("entities", [])
+            gold.ner = entry.get("entities", [])
             yield doc, gold
 
     def __len__(self):
@@ -98,17 +101,20 @@ class GoldDataset(Dataset):
         self.ds = ds_gold
         self.is_train = is_train
         self._len = 0
-        for d, gold in self:
+        nlp = spacy.blank(lang)
+        for d, gold in self.iter(nlp):
             self.add_labels(gold)
             self._len += 1
 
-    def iter(self, nlp, limit=None):
+    def iter(self, nlp, limit=None, **opts):
+        old_limit = None
         if limit is not None:
             old_limit, self.ds.limit = self.ds.limit, limit
         try:
-            ds = self.ds.train_docs(nlp) if self.is_train else self.ds.dev_docs(nlp)
-            for doc, gold in ds:
-                yield doc, gold
+            ds = self.ds.train_docs(nlp, **opts) if self.is_train else self.ds.dev_docs(nlp, **opts)
+            yield from ds
+            # for doc, gold in ds:
+            #    yield doc, gold
         finally:
             if limit is not None:
                 self.ds.limit = old_limit
