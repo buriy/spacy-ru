@@ -14,7 +14,6 @@ import tqdm
 from spacy import about
 from spacy import util
 from spacy._ml import create_default_optimizer
-from spacy.attrs import PROB, IS_OOV, CLUSTER, LANG
 from spacy.compat import path2str
 from spacy.gold import GoldCorpus
 from spacy.util import use_gpu as set_gpu

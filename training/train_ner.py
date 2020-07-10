@@ -8,8 +8,8 @@ import spacy
 from models.loadvec import get_ft_vec
 from models.ner import MyNER
 from models.t2v import build_tok2vec
-from training.ner.nerus import get_nerus, get_nerus_example
-from training.ner.trainer import Trainer, Extractor
+from training.corpora.nerus import get_nerus, get_nerus_example
+from training.trainer import Trainer, Extractor
 
 CFG = {"device": 0, "cpu_count": 4}
 TESTS = False
