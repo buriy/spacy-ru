@@ -9,8 +9,9 @@ browser:
 # GPU id, -1 = train on CPU
 G:=0
 
-S:=.venv/bin/python -m spacy
+S:=.venv/bin/python -u -m spacy
 D:=data/syntagrus
+G:=data/grameval
 F:=$(shell date +"%m-%d-%y_%H-%M-%S")
 V:=ru2
 M:=data/models/${V}-${F}
@@ -28,29 +29,48 @@ setup_cuda100: setup
 	./cuda.sh "<2.4" cuda100
 	.venv/bin/python3 -c "import spacy;spacy.require_gpu()"
 
+$G/GramEval2020-master:
+	mkdir -p $G
+	#wget https://github.com/dialogue-evaluation/GramEval2020/archive/master.zip -O $G/master.zip
+	cp data/master.zip $G/master.zip
+	cd $G; unzip master.zip
+
+$G/fiction.json: $G/GramEval2020-master
+	./convert.sh $G/GramEval2020-master/dataOpenTest/GramEval2020-RuEval2017-Lenta-news-dev.conllu >$G/news.json
+	./convert.sh $G/GramEval2020-master/dataOpenTest/GramEval2020-GSD-wiki-dev.conllu >$G/wiki.json
+	./convert.sh $G/GramEval2020-master/dataOpenTest/GramEval2020-SynTagRus-dev.conllu >$G/fiction.json
+	./convert.sh $G/GramEval2020-master/dataOpenTest/GramEval2020-RuEval2017-social-dev.conllu >$G/social.json
+	./convert.sh $G/GramEval2020-master/dataOpenTest/GramEval2020-Taiga-poetry-dev.conllu >$G/poetry.json
+
+ru2_raw/quality.txt:
+	echo "" > $@
+	./eval.sh ru2_raw $G/news.json >> $@
+	./eval.sh ru2_raw $G/wiki.json >> $@
+	./eval.sh ru2_raw $G/fiction.json >> $@
+	./eval.sh ru2_raw $G/social.json >> $@
+	./eval.sh ru2_raw $G/poetry.json >> $@
+	cat $@
+
+ru2_syntagrus/quality.txt:
+	echo "" > $@
+	./eval.sh ru2_syntagrus $G/news.json >> $@
+	./eval.sh ru2_syntagrus $G/wiki.json >> $@
+	./eval.sh ru2_syntagrus $G/fiction.json >> $@
+	./eval.sh ru2_syntagrus $G/social.json >> $@
+	./eval.sh ru2_syntagrus $G/poetry.json >> $@
+	cat $@
+
 $D:
 	git clone https://github.com/UniversalDependencies/UD_Russian-SynTagRus.git $D
 
-$D/train.conllu: $D
-	sed 's/Variant=/StyleVariant=/g; s/=1/=First/g; s/=2/=Second/g; s/=3/=Third/g;' $D/ru_syntagrus-ud-train.conllu >$D/train~.conllu
-	mv $D/train~.conllu $D/train.conllu
+$D/train.json: $D
+	./convert.sh $D/ru_syntagrus-ud-train.conllu $D/train.json
 
-$D/test.conllu: $D
-	sed 's/Variant=/StyleVariant=/g; s/=1/=First/g; s/=2/=Second/g; s/=3/=Third/g;' $D/ru_syntagrus-ud-test.conllu >$D/test~.conllu
-	mv $D/test~.conllu $D/test.conllu
+$D/test.json: $D
+	./convert.sh $D/ru_syntagrus-ud-test.conllu $D/test.json
 
-$D/dev.conllu: $D
-	sed 's/Variant=/StyleVariant=/g; s/=1/=First/g; s/=2/=Second/g; s/=3/=Third/g;' $D/ru_syntagrus-ud-dev.conllu >$D/dev~.conllu
-	mv $D/dev~.conllu $D/dev.conllu
-
-$D/train.json: $D/train.conllu
-	$S convert -m $D/train.conllu $D
-
-$D/test.json: $D/test.conllu
-	$S convert -m $D/test.conllu $D
-
-$D/dev.json: $D/dev.conllu
-	$S convert -m $D/dev.conllu $D
+$D/dev.json: $D
+	./convert.sh $D/ru_syntagrus-ud-dev.conllu $D/dev.json
 
 data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar:
 	echo "Please download yourself"
