@@ -8,6 +8,7 @@ browser:
 
 # GPU id, -1 = train on CPU
 GPU:=0
+CW:=150
 S:=.venv/bin/python -u -m spacy
 D:=data/syntagrus
 G:=data/grameval
@@ -32,8 +33,8 @@ setup_cuda100: setup
 
 $G/GramEval2020-master:
 	mkdir -p $G
-	#wget https://github.com/dialogue-evaluation/GramEval2020/archive/master.zip -O $G/master.zip
-	cp data/master.zip $G/master.zip
+	wget https://github.com/dialogue-evaluation/GramEval2020/archive/master.zip -O $G/master.zip
+	#cp data/master.zip $G/master.zip
 	cd $G; unzip master.zip
 
 $G/fiction.conllu:
@@ -44,11 +45,11 @@ $G/fiction.conllu:
 	cat ${Gdev}/GramEval2020-Taiga-poetry-dev.conllu ${Gtrain}/GramEval2020-Taiga-poetry-train.conllu >$G/poetry.conllu
 
 $G/fiction.json: $G/fiction.conllu
-	./convert.sh $G/news.conllu $G/news.json
-	./convert.sh $G/wiki.conllu $G/wiki.json
-	./convert.sh $G/fiction.conllu $G/fiction.json
-	./convert.sh $G/social.conllu $G/social.json
-	./convert.sh $G/poetry.conllu $G/poetry.json
+	./convert.sh 0 $G/news.conllu $G/news.json
+	./convert.sh 0 $G/wiki.conllu $G/wiki.json
+	./convert.sh 0 $G/fiction.conllu $G/fiction.json
+	./convert.sh 0 $G/social.conllu $G/social.json
+	./convert.sh 0 $G/poetry.conllu $G/poetry.json
 
 ru2_raw/quality.txt: ru2_raw
 	echo "" > $@
@@ -74,13 +75,13 @@ $D:
 	git clone https://github.com/UniversalDependencies/UD_Russian-SynTagRus.git $D
 
 $D/train.json: $D
-	./convert.sh $D/ru_syntagrus-ud-train.conllu $D/train.json
+	./convert.sh 10 $D/ru_syntagrus-ud-train.conllu $D/train.json
 
 $D/test.json: $D
-	./convert.sh $D/ru_syntagrus-ud-test.conllu $D/test.json
+	./convert.sh 0 $D/ru_syntagrus-ud-test.conllu $D/test.json
 
 $D/dev.json: $D
-	./convert.sh $D/ru_syntagrus-ud-dev.conllu $D/dev.json
+	./convert.sh 0 $D/ru_syntagrus-ud-dev.conllu $D/dev.json
 
 data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar:
 	echo "Please download yourself"
@@ -91,11 +92,11 @@ data/models/navec_hudlit.model: data/navec/navec_hudlit_v1_12B_500K_300d_100q.ta
 ru2_syntagrus: $D/train.json $D/test.json data/models/navec_hudlit.model
 	#rm -rf $@
 	mkdir -p $@
-	OPENBLAS_NUM_THREADS=1 $T -g ${GPU} -cw 150 -b data/models/navec_hudlit.model -G -n 30 ru $M $D/train.json $D/test.json | tee $@/accuracy.txt -
-	cp -r $M/model-final/* $Y/
+	OPENBLAS_NUM_THREADS=1 $T -g ${GPU} -cw ${CW} -b data/models/navec_hudlit.model -G -n 5 ru $M $D/train.json $D/test.json | tee $@/accuracy.txt -
+	cp -r $M/model-final/* $@
 
 ru2_raw: $D/train.json $D/test.json
-	OPENBLAS_NUM_THREADS=1 $T -g ${GPU} -cw 150 -G -n 30 ru $M $D/train.json $D/test.json
+	OPENBLAS_NUM_THREADS=1 $T -g ${GPU} -cw ${CW} -G -n 30 ru $M $D/train.json $D/test.json
 	mkdir -p $@
 	cp -r $M/model-final/* $@
 
