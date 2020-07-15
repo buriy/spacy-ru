@@ -6,7 +6,7 @@ RUN mkdir $PROJECT_DIR
 
 WORKDIR /
 #istall components for ru2 
-RUN conda install -y -c conda-forge spacy==2.2.4
+RUN conda install -y -c conda-forge spacy==2.1.9
 RUN pip install pymorphy2==0.8
 RUN git clone -b v2.1 https://github.com/buriy/spacy-ru.git
 RUN cp -r /spacy-ru/ru2/. $PROJECT_DIR/ru2
