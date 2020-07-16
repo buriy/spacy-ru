@@ -1,8 +1,18 @@
+import os
 import random
+import urllib.request
+from itertools import chain
+from typing import List
+
 import spacy
 import spacy.gold
-from itertools import chain
+from corus import load_factru
+from corus.sources.factru import DEVSET as FACTRU_DEVSET, TESTSET as FACTRU_TESTSET
+from corus.sources.factru import FactruSpan
+from nerus import const as nerus_const
 from tqdm.auto import tqdm
+
+from .tqdm import TqdmUpTo
 
 
 class Dataset:
@@ -78,9 +88,9 @@ class RawDataset(Dataset):
             random.shuffle(ds_copy)
         if limit:
             ds_copy = ds_copy[:limit]
-        for dict_ in self.ds:
+        for dict_ in ds_copy:
             doc = nlp(dict_["raw"])
-            gold = spacy.gold.GoldParse()
+            gold = spacy.gold.GoldParse(doc)
             gold.ner = dict_.get("entities", [])
             yield doc, gold
 
@@ -138,8 +148,8 @@ class Corpus:
 
     @staticmethod
     def from_raw(lang, ds_train, ds_test):
-        train = RawDataset(lang, ds_train)
-        test = RawDataset(lang, ds_test)
+        train = RawDataset(lang, ds_train, is_train=True)
+        test = RawDataset(lang, ds_test, is_train=False)
         return Corpus(train, test)
 
 
@@ -171,3 +181,61 @@ def tag_morphology(tag):
         k, v = p.split("=", 1)
         info[k] = v
     return info
+
+
+class FactRu(Corpus):
+
+    @staticmethod
+    def _resolve_data_path(data_path, download_if_not_exist):
+        data_path = data_path or os.path.join(nerus_const.SOURCES_DIR, nerus_const.FACTRU_DIR, 'master.zip')
+        print("FactRu data path: ", data_path)
+        if not os.path.exists(data_path):
+            if download_if_not_exist:
+                os.makedirs(os.path.dirname(data_path))
+
+                print("Download FactRu corpus to ", data_path)
+                with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1,
+                              desc="FactRu corpus downloading") as tqdm_:
+                    try:
+                        urllib.request.urlretrieve(nerus_const.FACTRU_URL, data_path, reporthook=tqdm_.update_to)
+                        tqdm_.total = tqdm_.n
+                    except Exception as e:
+                        os.remove(data_path)
+                        raise e
+                # TODO unpack in script
+                raise Exception("{} file is downloaded, please unzip master.zip and restart script".format(data_path))
+            else:
+                raise FileExistsError("Source data for FactRuEval corpus is not exist: {}".format(data_path))
+        return data_path
+
+    @staticmethod
+    def _load_list_dict(factru_data) -> List[dict]:
+        output_data = []
+        for element in factru_data:
+            dict_ = {"raw": element.text}
+            entities = []
+            for fact in element.facts:
+                for slot in fact.slots:
+                    if isinstance(slot.value, FactruSpan):
+                        span = slot.value
+                        entities.append((span.start, span.stop, span.type))
+
+                    elif not isinstance(slot.value, str):
+                        for obj in slot.value.objects:
+                            for span in obj.spans:
+                                entities.append((span.start, span.stop, span.type))
+
+            dict_["entities"] = entities
+            output_data.append(dict_)
+        return output_data
+
+    @staticmethod
+    def load(lang: str, data_path: str = None, download_if_not_exist: bool = True) -> Corpus:
+        data_path = FactRu._resolve_data_path(data_path, download_if_not_exist)
+
+        factru_dev_data = load_factru(data_path, sets=[FACTRU_DEVSET])
+        factru_test_data = load_factru(data_path, sets=[FACTRU_TESTSET])
+
+        train = RawDataset(lang, FactRu._load_list_dict(factru_dev_data), is_train=True)
+        test = RawDataset(lang, FactRu._load_list_dict(factru_test_data), is_train=False)
+        return Corpus(train, test)
