@@ -1,6 +1,5 @@
 #!/bin/sh
-VER=$1
-CUDA=$2
+CUDA=$1
 
-.venv/bin/pip uninstall -y spacy thinc cupy cupy-$2
-CUDA_ROOT=/usr/local/cuda .venv/bin/pip install --unstable-feature=resolver --no-cache-dir -U spacy==$1 cupy cupy-$2 thinc==7.4.0
+.venv/bin/pip uninstall -y cupy cupy-$1
+CUDA_ROOT=/usr/local/cuda .venv/bin/pip install --unstable-feature=resolver --no-cache-dir -U cupy\<8 cupy-$1\<8
