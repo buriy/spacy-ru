@@ -1,23 +1,23 @@
 # Модель русского языка для библиотеки spaCy
 
-## Преимущества модели ru2
+## Преимущества моделей ru2_syntagrus и ru2_nerus :
 Модель ru2 умеет определять не только POS-tag в x.pos_, но и лемму слова в x.lemma_ . Например, для существительных, лемма совпадает с формой именительного падежа, единственного числа.
 Из-за особенностей устройства библиотеки spacy, для более хорошего качества лемм, нужно писать
 ```
-import ru2
-nlp = ru2.load_ru2('ru2')
+import ru2 
+nlp = ru2.load_ru2('ru2_syntagrus')
 ```
 вместо стандартного
 ```
 import spacy
-nlp = spacy.load('ru2')
+nlp = spacy.load('ru2_syntagrus')
 ```
 
 Это также починит `.noun_chunks()` для русского, но они пока не идеально работают, будем доделывать.
 
 ## Модель ru2e
-Это "пустая" модель, которая использует стемминг (`pip install pystemmer`), полезна для пользовательских задач классификации, особенно, когда данных мало. Поскольку в этой модели нет POS-теггера, она не умеет получать леммы.
-Для использования стемминга надо писать аналогично модели ru2 выше:
+Это "пустая" модель, которая использует стемминг (`pip install pystemmer`), полезна для пользовательских задач классификации, особенно, когда данных мало. Поскольку в этой модели нет POS-теггера, она не умеет получать леммы со снятой омонимией.
+Для использования стемминга надо писать аналогично модели выше:
 ```
 import ru2e
 nlp = ru2e.load_ru2('ru2e')
@@ -37,10 +37,11 @@ https://github.com/buriy/spacy-ru/blob/master/notebooks/examples/textcat_news_to
 - pip: `pip install pymorphy2==0.8`
 - conda: *к сожалению в репозиторях anaconda данный пакет доступен только для платформы osx-64* `conda install -c romanp pymorphy2==0.8`	
 
-2. установить spacy 2.1:
-- pip: `pip install spacy==2.1.9`
-- conda: `conda install -c conda-forge spacy==2.1.9`
-3. Скопировать каталог ru2 из репозитория себе в проект: `git clone -b v2.1 https://github.com/buriy/spacy-ru.git && cp -r ./spacy-ru/ru2/. /my_project_destination/ru2 `
+2. установить spacy 2.3:
+- pip: `pip install spacy==2.3.1`
+- conda: `conda install -c conda-forge spacy==2.3.1`
+3. Скопировать каталог ru2 из репозитория себе в проект: `git clone -b v2.3 https://github.com/buriy/spacy-ru.git && cp -r ./spacy-ru/ru2/. /my_project_destination/ru2 `
+4. Взять нужную модель из релизов ( https://github.com/buriy/spacy-ru/releases/tag/v2.3_pre1 ) и скопировать себе в проект.
  
 После этого нужно загрузить модели с морфологией и синтаксисом 
 ```python
@@ -56,7 +57,7 @@ if __name__ == '__main__':
 Если нужна модель с pymorphy2 в качестве лемматизатора и POS: `nlp = spacy.load('ru2', disable=['tagger', 'parser', 'NER'])`
 
 ### Пример в Docker контейнере
-вы можете попробовать пример использования ru2 модели:
+вы можете попробовать следующий пример использования ru2 модели:
 ```bash
 git clone https://github.com/buriy/spacy-ru.git
 cd spacy-ru
@@ -65,12 +66,12 @@ docker run --rm spacy:ru2
 ```
 
 ### Предупреждения и возможные проблемы
- - Если нужна работа на GPU (ускоряет обучение в 2-3 раза, инференс -- до 5 раз), то, возможно, нужно исправить (явно указать) путь к cuda и переустановить библиотеку thinc:
+ - Если нужна работа на GPU (ускоряет обучение и инференс в 5-50 раз в зависимости от настроек модели), то, возможно, нужно исправить (явно указать) путь к cuda и может даже придётся переустановить библиотеку thinc:
 ```bash
 pip uninstall -y thinc
-CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc==7.0.8
+CUDA_HOME=/usr/local/cuda pip install --no-cache-dir thinc==7.4.0
 ```
-Другой вариант -- попробовать что-то типа `pip install "spacy[cuda91]<2.2"` или `pip install "spacy[cuda10]<2.2"` для spacy версии 2.1.x и вашей версии cuda.
+Другой вариант -- попробовать что-то типа `pip install "spacy[cuda91]<2.4"` или `pip install "spacy[cuda102]<2.4"` для spacy версии 2.3.x и вашей версии cuda.
 
 Если GPU по-прежнему не работает -- стоит явно проверить, что `cupy` установлена верно для вашей версии cuda: [link](https://docs-cupy.chainer.org/en/stable/install.html#install-cupy)
 пример установки для cuda 10.0
@@ -85,10 +86,10 @@ $ which nvcc
 $ CUDA_HOME=/usr/local/cuda
 $ pip install cupy-cuda100
 ...
-Successfully installed cupy-cuda100-7.1.0
+Successfully installed cupy-cuda100-7.6.0
 $ pip install --no-cache-dir "spacy[cuda10]<2.2"
 ...
-Successfully installed blis-0.2.4 preshed-2.0.1 spacy-2.1.9 thinc-7.0.8
+Successfully installed blis-0.4.1 preshed-2.0.1 spacy-2.3.1 thinc-7.4.0
 ```
 
 - Если вы переходите с многоязычной модели "xx" на модели ru/ru2, то имейте в виду, что токенизация в моделях ru/ru2 и xx отличается, т.к. xx не отделяет буквы от цифр и дефисы, то есть скажем слова "24-часовой" и "va-sya103" будут едиными неделимыми токенами.
