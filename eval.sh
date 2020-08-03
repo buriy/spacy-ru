@@ -1,4 +1,6 @@
 #!/bin/sh
-echo -n "$(basename $2)\t"
-.venv/bin/python -t -m spacy evaluate -g 0 $1 $2 | egrep --color=never "Time|POS|UAS|LAS" | tr '\n' '\t'
+SRC=shift;
+DEST=shift;
+echo -n "$(basename $DEST)\t"
+.venv/bin/python -t -m spacy evaluate "$@" $SRC $DEST | egrep --color=never "Time|POS|UAS|LAS" | tr '\n' '\t'
 echo ""

@@ -7,9 +7,9 @@ browser:
 	PYTHONPATH=`pwd` screen .venv/bin/jupyter notebook --ip 0.0.0.0 --port=8881 .
 
 # GPU id, -1 = train on CPU
-GPU:=0
+GPU:=-0
 CUDA:=91
-CW:=150
+CW:=96
 WF:=-b data/models/navec_hudlit.model
 OPTS:=
 EPOCHS:=30
@@ -67,16 +67,16 @@ $G/poetry.json: $G/poetry.conllu
 
 $N/quality.txt: $G/poetry.json $G/poetry-dev.json
 	echo "" > $@
-	./eval.sh $N $G/news-dev.json >> $@
-	./eval.sh $N $G/wiki-dev.json >> $@
-	./eval.sh $N $G/fiction-dev.json >> $@
-	./eval.sh $N $G/social-dev.json >> $@
-	./eval.sh $N $G/poetry-dev.json >> $@
-	./eval.sh $N $G/news.json >> $@
-	./eval.sh $N $G/wiki.json >> $@
-	./eval.sh $N $G/fiction.json >> $@
-	./eval.sh $N $G/social.json >> $@
-	./eval.sh $N $G/poetry.json >> $@
+	./eval.sh $N $G/news-dev.json -g ${GPU} >> $@
+	./eval.sh $N $G/wiki-dev.json -g ${GPU} >> $@
+	./eval.sh $N $G/fiction-dev.json -g ${GPU} >> $@
+	./eval.sh $N $G/social-dev.json -g ${GPU} >> $@
+	./eval.sh $N $G/poetry-dev.json -g ${GPU} >> $@
+	./eval.sh $N $G/news.json -g ${GPU} >> $@
+	./eval.sh $N $G/wiki.json -g ${GPU} >> $@
+	./eval.sh $N $G/fiction.json -g ${GPU} >> $@
+	./eval.sh $N $G/social.json -g ${GPU} >> $@
+	./eval.sh $N $G/poetry.json -g ${GPU} >> $@
 
 eval: $N/quality.txt
 	cat $N/quality.txt
