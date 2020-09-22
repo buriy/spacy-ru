@@ -29,6 +29,8 @@ tabulate = ">=0.8.6"
 # fasttext = "^0.9.1"
 compress_fasttext = "^0.0.2"
 spacy = "^2.3.1"
+conllu = "^4.2"
+wheel = "^0.35.1"
 
 [tool.poetry.dev-dependencies]
 #spacy = { git = "https://github.com/buriy/spaCy.git", branch = "master" }

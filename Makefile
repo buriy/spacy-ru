@@ -7,15 +7,21 @@ browser:
 	PYTHONPATH=`pwd` screen .venv/bin/jupyter notebook --ip 0.0.0.0 --port=8881 .
 
 # GPU id, -1 = train on CPU
-GPU:=-0
+GPU:=-1
 CUDA:=91
 CW:=96
 WF:=-b data/models/navec_hudlit.model
 OPTS:=
-EPOCHS:=30
-N:=ru2_syntagrus_${CW}
+EPOCHS:=20
+B:=syntagrus
+N:=ru2_$B_${CW}
+P:=tagger,parser,ner
 S:=.venv/bin/python -u -m spacy
-D:=data/syntagrus
+D:=data/$B
+Dsyntagrus:=data/syntagrus
+DT:=${D}/train.json
+DD:=${Dsyntagrus}/dev.json
+DE:=${Dsyntagrus}/test.json
 G:=data/grameval
 Gdev:=$G/GramEval2020-master/dataOpenTest
 Gtrain:=$G/GramEval2020-master/dataTrain
@@ -79,19 +85,25 @@ $N/quality.txt: $G/poetry.json $G/poetry-dev.json
 	./eval.sh $N $G/poetry.json -g ${GPU} >> $@
 
 eval: $N/quality.txt
-	cat $N/quality.txt
+	cat $N/quality.txt | sed 's/fiction-dev/fic-dev/'
+
+${Dsyntagrus}:
+	git clone https://github.com/UniversalDependencies/UD_Russian-SynTagRus.git $@
+	cp $@/ru_syntagrus-ud-train.conllu $@/train.conllu
+	cp $@/ru_syntagrus-ud-test.conllu $@/test.conllu
+	cp $@/ru_syntagrus-ud-dev.conllu $@/dev.conllu
 
 $D:
-	git clone https://github.com/UniversalDependencies/UD_Russian-SynTagRus.git $D
+	echo ""
 
-$D/train.json: $D
-	./convert.sh 10 $D/ru_syntagrus-ud-train.conllu $D/train.json
+${DT}: $D
+	./convert.sh 10 $D/train.conllu $@
 
-$D/test.json: $D
-	./convert.sh 1 $D/ru_syntagrus-ud-test.conllu $D/test.json
+${DD}: ${Dsyntagrus}
+	./convert.sh 1 ${Dsyntagrus}/test.conllu $@
 
-$D/dev.json: $D
-	./convert.sh 1 $D/ru_syntagrus-ud-dev.conllu $D/dev.json
+${DE}: ${Dsyntagrus}
+	./convert.sh 1 ${Dsyntagrus}/dev.conllu $@
 
 data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar:
 	curl https://storage.yandexcloud.net/natasha-navec/packs/navec_hudlit_v1_12B_500K_300d_100q.tar -o data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar
@@ -99,21 +111,16 @@ data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar:
 data/models/navec_hudlit.model: data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar
 	.venv/bin/python -m training.navec2spacy -m data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar -o data/models/navec_hudlit.model
 
-$N/accuracy.txt: $D/train.json $D/test.json data/models/navec_hudlit.model
+$N/accuracy.txt: ${DT} ${DD} data/models/navec_hudlit.model
 	mkdir -p $M
-	OPENBLAS_NUM_THREADS=1 $T -p tagger,parser -R -g ${GPU} -cw ${CW} ${WF} ${OPTS} -G -n ${EPOCHS} ru $M $D/train.json $D/test.json | tee $M/accuracy.txt
+	OPENBLAS_NUM_THREADS=1 $T -p ${P} -R -g ${GPU} -cw ${CW} ${WF} ${OPTS} -G -n ${EPOCHS} ru $M ${DT} ${DD} | tee $M/accuracy.txt
 	mkdir -p $N
 	cp -r $M/model-final/* $N
 	cp $M/accuracy.txt $@
 
 train: $N/accuracy.txt
 
-train-check: $D/dev.json $D/test.json 
-	OPENBLAS_NUM_THREADS=1 $T -g ${GPU} -G -n 2 ru $M $D/dev.json $D/test.json
-	mkdir -p ru2_train_on_dev/
-	cp -r $M/model-final/* ru2_train_on_dev/
-
-train-ner: 
-	echo $T -g ${GPU} -G -n 20 ru $M $D/ru_syntagrus-ud-train.json $D/ru_syntagrus-ud-test.json
-	#mkdir -p $N/
-	#cp -r $M/model-final/* $N/
+train-check: ${DE} ${DD} 
+	OPENBLAS_NUM_THREADS=1 $T -g ${GPU} -G -n 2 ru $M ${DD} ${DE}
+	mkdir -p ru2_train_on_test/
+	cp -r $M/model-final/* ru2_train_on_test/

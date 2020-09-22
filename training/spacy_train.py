@@ -181,6 +181,7 @@ def train(
             msg.warn("Unable to activate GPU: {}".format(use_gpu))
             msg.text("Using CPU only")
             use_gpu = -1
+    base_components = []
     if base_model:
         msg.text("Starting with base model '{}'".format(base_model))
         nlp = util.load_model(base_model)
@@ -226,6 +227,7 @@ def train(
                             exits=1,
                         )
                 msg.text("Extending component from base model '{}'".format(pipe))
+                base_components.append(pipe)
         disabled_pipes = nlp.disable_pipes(
             [p for p in nlp.pipe_names if p not in pipeline]
         )
@@ -301,7 +303,7 @@ def train(
 
     # Load in pretrained weights
     if init_tok2vec is not None:
-        components = _load_pretrained_tok2vec(nlp, init_tok2vec)
+        components = _load_pretrained_tok2vec(nlp, init_tok2vec, base_components)
         msg.text("Loaded pretrained tok2vec for: {}".format(components))
 
     # Verify textcat config
@@ -575,6 +577,8 @@ def train(
         with nlp.use_params(optimizer.averages):
             final_model_path = output_path / "model-final"
             nlp.to_disk(final_model_path)
+            srsly.write_json(final_model_path / "meta.json", meta)
+
             meta_loc = output_path / "model-final" / "meta.json"
             final_meta = srsly.read_json(meta_loc)
             final_meta.setdefault("accuracy", {})
@@ -644,7 +648,7 @@ def _load_vectors(nlp, vectors):
     util.load_model(vectors, vocab=nlp.vocab)
 
 
-def _load_pretrained_tok2vec(nlp, loc):
+def _load_pretrained_tok2vec(nlp, loc, base_components):
     """Load pretrained weights for the 'token-to-vector' part of the component
     models, which is typically a CNN. See 'spacy pretrain'. Experimental.
     """
@@ -653,6 +657,8 @@ def _load_pretrained_tok2vec(nlp, loc):
     loaded = []
     for name, component in nlp.pipeline:
         if hasattr(component, "model") and hasattr(component.model, "tok2vec"):
+            if name in base_components:
+                raise ValueError(Errors.E200.format(component=name))
             component.tok2vec.from_bytes(weights_data)
             loaded.append(name)
     return loaded
