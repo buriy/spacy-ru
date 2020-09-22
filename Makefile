@@ -106,6 +106,7 @@ ${DE}: ${Dsyntagrus}
 	./convert.sh 1 ${Dsyntagrus}/dev.conllu $@
 
 data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar:
+	mkdir -p data/navec
 	curl https://storage.yandexcloud.net/natasha-navec/packs/navec_hudlit_v1_12B_500K_300d_100q.tar -o data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar
 
 data/models/navec_hudlit.model: data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar
