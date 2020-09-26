@@ -34,6 +34,9 @@ setup:
 	test -d .venv || python3 -m venv .venv
 	poetry install
 
+save_requirements:
+	poetry export -f requirements.txt --without-hashes >requirements.txt
+
 setup_cuda: setup
 	./cuda.sh cuda${CUDA}
 	.venv/bin/python3 -c "import spacy;spacy.require_gpu()"
