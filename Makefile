@@ -73,8 +73,7 @@ $G/poetry.json: $G/poetry.conllu
 	./convert.sh 1 $G/poetry.conllu $G/poetry.json
 
 $N/quality.txt: $G/poetry.json $G/poetry-dev.json
-	echo "" > $@
-	./eval.sh $N $G/news-dev.json -g ${GPU} >> $@
+	./eval.sh $N $G/news-dev.json -g ${GPU} > $@
 	./eval.sh $N $G/wiki-dev.json -g ${GPU} >> $@
 	./eval.sh $N $G/fiction-dev.json -g ${GPU} >> $@
 	./eval.sh $N $G/social-dev.json -g ${GPU} >> $@
@@ -84,6 +83,8 @@ $N/quality.txt: $G/poetry.json $G/poetry-dev.json
 	./eval.sh $N $G/fiction.json -g ${GPU} >> $@
 	./eval.sh $N $G/social.json -g ${GPU} >> $@
 	./eval.sh $N $G/poetry.json -g ${GPU} >> $@
+	echo >> $@
+	./eval-ner.sh $N data/nerus/dev.json -g ${GPU} >> $@
 
 eval: $N/quality.txt
 	cat $N/quality.txt | sed 's/fiction-dev/fic-dev/'
