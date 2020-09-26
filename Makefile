@@ -19,7 +19,7 @@ P:=tagger,parser,ner
 S:=.venv/bin/python -u -m spacy
 D:=data/$B
 Dsyntagrus:=data/syntagrus
-DT:=${D}/train.json
+DT:=${D}/train/
 DD:=${Dsyntagrus}/dev.json
 DE:=${Dsyntagrus}/test.json
 G:=data/grameval
@@ -93,11 +93,10 @@ ${Dsyntagrus}:
 	cp $@/ru_syntagrus-ud-test.conllu $@/test.conllu
 	cp $@/ru_syntagrus-ud-dev.conllu $@/dev.conllu
 
-$D:
-	echo ""
+${DT}: ${DT}/.done
 
-${DT}: $D
-	./convert.sh 10 $D/train.conllu $@
+${DT}/.done: $D
+	./convert_dir.sh 10 $D/train*.conllu ${DT}
 
 ${DD}: ${Dsyntagrus}
 	./convert.sh 1 ${Dsyntagrus}/test.conllu $@
