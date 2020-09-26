@@ -1,5 +1,7 @@
 #!/bin/bash
-echo 'Converting' $2
-sed 's/Variant=/StyleVariant=/g; s/=1/=First/g; s/=2/=Second/g; s/=3/=Third/g; s/Tag=//g; s/|SpaceAfter=No//g' $2 >>/tmp/$$.conllu
-.venv/bin/python -u -m spacy convert -n $1 -m /tmp/$$.conllu >$3
+s=$2
+echo 'Converting' $s
+fn="${s##*/}"
+.venv/bin/python -u -m training.fix_conllu $2 >/tmp/$fn.$$.conllu
+.venv/bin/python -u -m spacy convert -n $1 -m /tmp/$fn.$$.conllu $3
 echo "OK"

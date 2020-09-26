@@ -12,7 +12,7 @@ CUDA:=91
 CW:=96
 WF:=-b data/models/navec_hudlit.model
 OPTS:=
-EPOCHS:=20
+E:=20
 B:=syntagrus
 N:=ru2_$B_${CW}
 P:=tagger,parser,ner
@@ -28,6 +28,7 @@ Gtrain:=$G/GramEval2020-master/dataTrain
 F:=$(shell date +"%m-%d-%y_%H-%M-%S")
 M:=data/models/${N}-${F}
 T:=.venv/bin/python -u -m training.spacy_train
+fix:=.venv/bin/python -u -m training.fix_conllu
 
 setup:
 	test -d .venv || python3 -m venv .venv
@@ -44,18 +45,18 @@ $G/GramEval2020-master:
 	cd $G; unzip master.zip
 
 $G/poetry-dev.conllu: $G/GramEval2020-master
-	cat ${Gdev}/GramEval2020-RuEval2017-Lenta-news-dev.conllu >$G/news-dev.conllu
-	cat ${Gdev}/GramEval2020-GSD-wiki-dev.conllu >$G/wiki-dev.conllu
-	cat ${Gdev}/GramEval2020-SynTagRus-dev.conllu >$G/fiction-dev.conllu
-	cat ${Gdev}/GramEval2020-RuEval2017-social-dev.conllu >$G/social-dev.conllu
-	cat ${Gdev}/GramEval2020-Taiga-poetry-dev.conllu >$G/poetry-dev.conllu
+	${fix} ${Gdev}/GramEval2020-RuEval2017-Lenta-news-dev.conllu >$G/news-dev.conllu
+	${fix} ${Gdev}/GramEval2020-GSD-wiki-dev.conllu >$G/wiki-dev.conllu
+	${fix} ${Gdev}/GramEval2020-SynTagRus-dev.conllu >$G/fiction-dev.conllu
+	${fix} ${Gdev}/GramEval2020-RuEval2017-social-dev.conllu >$G/social-dev.conllu
+	${fix} ${Gdev}/GramEval2020-Taiga-poetry-dev.conllu >$G/poetry-dev.conllu
 
 $G/poetry.conllu: $G/GramEval2020-master
-	cat ${Gdev}/GramEval2020-RuEval2017-Lenta-news-dev.conllu ${Gtrain}/MorphoRuEval2017-Lenta-train.conllu >$G/news.conllu
-	cat ${Gdev}/GramEval2020-GSD-wiki-dev.conllu ${Gtrain}/GramEval2020-GSD-train.conllu >$G/wiki.conllu
-	cat ${Gdev}/GramEval2020-SynTagRus-dev.conllu ${Gtrain}/GramEval2020-SynTagRus-train-v2.conllu ${Gtrain}/MorphoRuEval2017-JZ-gold.conllu >$G/fiction.conllu
-	cat ${Gdev}/GramEval2020-RuEval2017-social-dev.conllu ${Gtrain}/GramEval2020-Taiga-social-train.conllu ${Gtrain}/MorphoRuEval2017-VK-gold.conllu >$G/social.conllu
-	cat ${Gdev}/GramEval2020-Taiga-poetry-dev.conllu ${Gtrain}/GramEval2020-Taiga-poetry-train.conllu >$G/poetry.conllu
+	${fix} ${Gdev}/GramEval2020-RuEval2017-Lenta-news-dev.conllu ${Gtrain}/MorphoRuEval2017-Lenta-train.conllu >$G/news.conllu
+	${fix} ${Gdev}/GramEval2020-GSD-wiki-dev.conllu ${Gtrain}/GramEval2020-GSD-train.conllu >$G/wiki.conllu
+	${fix} ${Gdev}/GramEval2020-SynTagRus-dev.conllu ${Gtrain}/GramEval2020-SynTagRus-train-v2.conllu ${Gtrain}/MorphoRuEval2017-JZ-gold.conllu >$G/fiction.conllu
+	${fix} ${Gdev}/GramEval2020-RuEval2017-social-dev.conllu ${Gtrain}/GramEval2020-Taiga-social-train.conllu ${Gtrain}/MorphoRuEval2017-VK-gold.conllu >$G/social.conllu
+	${fix} ${Gdev}/GramEval2020-Taiga-poetry-dev.conllu ${Gtrain}/GramEval2020-Taiga-poetry-train.conllu >$G/poetry.conllu
 
 $G/poetry-dev.json: $G/poetry-dev.conllu
 	./convert.sh 1 $G/news-dev.conllu $G/news-dev.json
@@ -96,7 +97,7 @@ ${Dsyntagrus}:
 ${DT}: ${DT}/.done
 
 ${DT}/.done: $D
-	./convert_dir.sh 10 $D/train*.conllu ${DT}
+	./convert-dir.sh 10 $D/train*.conllu ${DT}
 
 ${DD}: ${Dsyntagrus}
 	./convert.sh 1 ${Dsyntagrus}/test.conllu $@
@@ -113,7 +114,7 @@ data/models/navec_hudlit.model: data/navec/navec_hudlit_v1_12B_500K_300d_100q.ta
 
 $N/accuracy.txt: ${DT} ${DD} data/models/navec_hudlit.model
 	mkdir -p $M
-	OPENBLAS_NUM_THREADS=1 $T -p ${P} -R -g ${GPU} -cw ${CW} ${WF} ${OPTS} -G -n ${EPOCHS} ru $M ${DT} ${DD} | tee $M/accuracy.txt
+	OPENBLAS_NUM_THREADS=1 $T -p ${P} -R -g ${GPU} -cw ${CW} ${WF} ${OPTS} -G -n ${E} ru $M ${DT} ${DD} | tee $M/accuracy.txt
 	mkdir -p $N
 	cp -r $M/model-final/* $N
 	cp $M/accuracy.txt $@

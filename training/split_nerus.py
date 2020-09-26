@@ -1,8 +1,8 @@
 import os
+import unicodedata
 
 from conllu import parse_incr
 from tqdm.auto import tqdm
-import unicodedata
 
 
 def count_roots(tokenlist):
@@ -84,7 +84,7 @@ def fix_sent_labels(sentence):
     # combine unicode symbols with accents such as 'Й' into one
     sentence.metadata['text'] = unicodedata.normalize('NFC', sentence.metadata['text'])
 
-    stext = sentence.metadata['text']+'\n'
+    stext = sentence.metadata['text'] + '\n'
     next_start = 0
     for token in sentence:
         token['form'] = unicodedata.normalize('NFC', token['form'])
@@ -94,7 +94,7 @@ def fix_sent_labels(sentence):
 
         # infer SpaceAfter
         start = stext.find(token['form'], next_start)
-        if not stext[start+len(token['form'])].isspace():
+        if not stext[start + len(token['form'])].isspace():
             token['misc']['SpaceAfter'] = 'No'
         next_start = start + len(token['form'])
 
@@ -115,11 +115,12 @@ def main():
             continue
 
         sentences += 1
+        output_file.writelines(sentence.serialize())
+
         if sentences >= 50000:
             chunk_id += 1
             output_file = open(f"data/nerus/chunks/{chunk_id:03d}.conllu", "w", encoding="utf-8")
             sentences = 0
-        output_file.writelines(sentence.serialize())
 
     input_file.close()
     output_file.close()
