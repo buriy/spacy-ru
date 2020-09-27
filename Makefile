@@ -20,8 +20,8 @@ S:=.venv/bin/python -u -m spacy
 D:=data/$B
 Dsyntagrus:=data/syntagrus
 DT:=${D}/train/
-DD:=${Dsyntagrus}/dev.json
-DE:=${Dsyntagrus}/test.json
+DD:=data/syntagrus/dev.json
+DE:=data/syntagrus/test.json
 G:=data/grameval
 Gdev:=$G/GramEval2020-master/dataOpenTest
 Gtrain:=$G/GramEval2020-master/dataTrain
@@ -92,22 +92,26 @@ $N/quality.txt: $G/poetry.json $G/poetry-dev.json
 eval: $N/quality.txt
 	cat $N/quality.txt | sed 's/fiction-dev/fic-dev/'
 
-${Dsyntagrus}:
+data/syntagrus:
 	git clone https://github.com/UniversalDependencies/UD_Russian-SynTagRus.git $@
-	cp $@/ru_syntagrus-ud-train.conllu $@/train.conllu
-	cp $@/ru_syntagrus-ud-test.conllu $@/test.conllu
-	cp $@/ru_syntagrus-ud-dev.conllu $@/dev.conllu
+
+data/syntagrus/train.conllu: data/syntagrus
+	cp data/syntagrus/ru_syntagrus-ud-train.conllu $@
+data/syntagrus/test.conllu: data/syntagrus
+	cp data/syntagrus/ru_syntagrus-ud-test.conllu $@
+data/syntagrus/dev.conllu: data/syntagrus
+	cp data/syntagrus/ru_syntagrus-ud-dev.conllu $@
 
 ${DT}: ${DT}/.done
 
 ${DT}/.done: $D
 	./convert-dir.sh 10 $D/train*.conllu ${DT}
 
-${DD}: ${Dsyntagrus}
-	./convert.sh 1 ${Dsyntagrus}/test.conllu $@
+${DD}: data/syntagrus/dev.conllu
+	./convert.sh 1 data/syntagrus/dev.conllu $@
 
-${DE}: ${Dsyntagrus}
-	./convert.sh 1 ${Dsyntagrus}/dev.conllu $@
+${DE}: data/syntagrus/test.conllu
+	./convert.sh 1 data/syntagrus/test.conllu $@
 
 data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar:
 	mkdir -p data/navec
