@@ -29,6 +29,7 @@ F:=$(shell date +"%m-%d-%y_%H-%M-%S")
 M:=data/models/${N}-${F}
 T:=.venv/bin/python -u -m training.spacy_train
 fix:=.venv/bin/python -u -m training.fix_conllu
+split_nerus:=.venv/bin/python -u -m training.split_nerus
 
 setup:
 	test -d .venv || python3 -m venv .venv
@@ -86,19 +87,37 @@ $N/quality.txt: $G/poetry.json $G/poetry-dev.json
 	./eval.sh $N $G/fiction.json -g ${GPU} >> $@
 	./eval.sh $N $G/social.json -g ${GPU} >> $@
 	./eval.sh $N $G/poetry.json -g ${GPU} >> $@
+
+$N/quality-ner.txt: data/nerus/dev.json
 	echo >> $@
 	./eval-ner.sh $N data/nerus/dev.json -g ${GPU} >> $@
 
 eval: $N/quality.txt
 	cat $N/quality.txt | sed 's/fiction-dev/fic-dev/'
 
+eval-ner: $N/quality-ner.txt
+	cat $N/quality-ner.txt | sed 's/fiction-dev/fic-dev/'
+
+data/nerus/nerus_lenta.conllu:
+	mkdir -p data/nerus
+	curl https://storage.yandexcloud.net/natasha-nerus/data/nerus_lenta.conllu.gz -o data/nerus/
+	gzip -d data/nerus/nerus_lenta.conllu.gz
+
+data/nerus/chunks/: data/nerus/nerus_lenta.conllu
+	${split_nerus}
+
+data/nerus/dev.conllu:
+	cp data/nerus/chunks/train_151.conllu
+
 data/syntagrus:
 	git clone https://github.com/UniversalDependencies/UD_Russian-SynTagRus.git $@
 
 data/syntagrus/train.conllu: data/syntagrus
 	cp data/syntagrus/ru_syntagrus-ud-train.conllu $@
+
 data/syntagrus/test.conllu: data/syntagrus
 	cp data/syntagrus/ru_syntagrus-ud-test.conllu $@
+
 data/syntagrus/dev.conllu: data/syntagrus
 	cp data/syntagrus/ru_syntagrus-ud-dev.conllu $@
 
