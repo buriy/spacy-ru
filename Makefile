@@ -14,19 +14,22 @@ WF:=-b data/models/navec_hudlit.model
 OPTS:=
 E:=20
 B:=syntagrus
+D:=data/$B
+DT:=${D}/train/
 N:=ru2_$B_${CW}
 P:=tagger,parser,ner
 S:=.venv/bin/python -u -m spacy
-D:=data/$B
-Dsyntagrus:=data/syntagrus
-DT:=${D}/train/
-DD:=data/syntagrus/dev.json
-DE:=data/syntagrus/test.json
-G:=data/grameval
+
+STR:=data/syntagrus_data
+DD:=${STR}/dev.json
+DE:=${STR}/test.json
+G:=data/grameval_data
 Gdev:=$G/GramEval2020-master/dataOpenTest
 Gtrain:=$G/GramEval2020-master/dataTrain
+NERUS:=data/nerus_data
 F:=$(shell date +"%m-%d-%y_%H-%M-%S")
 M:=data/models/${N}-${F}
+
 T:=.venv/bin/python -u -m training.spacy_train
 fix:=.venv/bin/python -u -m training.fix_conllu
 split_nerus:=.venv/bin/python -u -m training.split_nerus
@@ -88,49 +91,52 @@ $N/quality.txt: $G/poetry.json $G/poetry-dev.json
 	./eval.sh $N $G/social.json -g ${GPU} >> $@
 	./eval.sh $N $G/poetry.json -g ${GPU} >> $@
 
-$N/quality-ner.txt: data/nerus/dev.json
+${NERUS}/dev.json:
+	./convert.sh 1 ${NERUS}/train/train_151.conllu $G/dev.json
+
+$N/quality-ner.txt: ${NERUS}/dev.json
 	echo >> $@
-	./eval-ner.sh $N data/nerus/dev.json -g ${GPU} >> $@
+	./eval-ner.sh $N ${NERUS}/dev.json -g ${GPU} >> $@
 
 eval: $N/quality.txt
-	cat $N/quality.txt | sed 's/fiction-dev/fic-dev/'
+	cat $N/quality.txt | sed 's/fiction-dev/fic-dev/g; s/\./,/g; s/,json/.json/g'
 
 eval-ner: $N/quality-ner.txt
-	cat $N/quality-ner.txt | sed 's/fiction-dev/fic-dev/'
+	cat $N/quality-ner.txt | sed 's/fiction-dev/fic-dev/g; s/\./,/g; s/,json/.json/g'
 
-data/nerus/nerus_lenta.conllu:
-	mkdir -p data/nerus
-	curl https://storage.yandexcloud.net/natasha-nerus/data/nerus_lenta.conllu.gz -o data/nerus/
-	gzip -d data/nerus/nerus_lenta.conllu.gz
+${NERUS}/nerus_lenta.conllu:
+	mkdir -p data/nerus_data
+	curl https://storage.yandexcloud.net/natasha-nerus/data/nerus_lenta.conllu.gz -o ${NERUS}/
+	gzip -d ${NERUS}/nerus_lenta.conllu.gz
 
-data/nerus/chunks/: data/nerus/nerus_lenta.conllu
+${NERUS}/chunks/: ${NERUS}/nerus_lenta.conllu
 	${split_nerus}
 
-data/nerus/dev.conllu:
-	cp data/nerus/chunks/train_151.conllu
+${NERUS}/dev.conllu:
+	cp ${NERUS}/chunks/train_151.conllu
 
-data/syntagrus:
+${STR}:
 	git clone https://github.com/UniversalDependencies/UD_Russian-SynTagRus.git $@
 
-data/syntagrus/train.conllu: data/syntagrus
-	cp data/syntagrus/ru_syntagrus-ud-train.conllu $@
+${STR}/train.conllu: ${STR}
+	cp ${STR}/ru_syntagrus-ud-train.conllu $@
 
-data/syntagrus/test.conllu: data/syntagrus
-	cp data/syntagrus/ru_syntagrus-ud-test.conllu $@
+${STR}/test.conllu: ${STR}
+	cp ${STR}/ru_syntagrus-ud-test.conllu $@
 
-data/syntagrus/dev.conllu: data/syntagrus
-	cp data/syntagrus/ru_syntagrus-ud-dev.conllu $@
+${STR}/dev.conllu: ${STR}
+	cp ${STR}/ru_syntagrus-ud-dev.conllu $@
 
 ${DT}: ${DT}/.done
 
 ${DT}/.done: $D
-	./convert-dir.sh 10 $D/train*.conllu ${DT}
+	./convert-dir.sh 10 $D/*.conllu ${DT}
 
-${DD}: data/syntagrus/dev.conllu
-	./convert.sh 1 data/syntagrus/dev.conllu $@
+${DD}: ${STR}/dev.conllu
+	./convert.sh 1 ${STR}/dev.conllu $@
 
-${DE}: data/syntagrus/test.conllu
-	./convert.sh 1 data/syntagrus/test.conllu $@
+${DE}: ${STR}/test.conllu
+	./convert.sh 1 ${STR}/test.conllu $@
 
 data/navec/navec_hudlit_v1_12B_500K_300d_100q.tar:
 	mkdir -p data/navec

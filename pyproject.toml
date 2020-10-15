@@ -11,7 +11,7 @@ pymorphy2 = {extras = ["fast"], version = ">=0.8"}
 # pymystem3 = ">=0.2.0"
 
 spacy-lookups-data = "*"
-cupy = "^7.3.0"
+cupy = "^7.6.0"
 thinc = ">=7.0.8"
 
 razdel = ">=0.4.0"
