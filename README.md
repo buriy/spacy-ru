@@ -1,6 +1,6 @@
 # Модель русского языка для библиотеки spaCy
 
-# Появились модели для spacy 2.3:
+## Появились модели для spacy 2.3:
 
 https://github.com/buriy/spacy-ru/releases/tag/v2.3_beta 
 
